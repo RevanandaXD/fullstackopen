@@ -1,0 +1,16 @@
+.flags {
+  border: 1px solid #000;
+}
+
+.container {
+  margin-top: 5px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.container p {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
