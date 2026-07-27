@@ -14,7 +14,7 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
 
-const port = 3002;
+const PORT = process.env.PORT || 3002;
 
 let persons = [
   {
@@ -111,6 +111,6 @@ app.get("/api/info", (req, res) => {
 
 morgan(":method :url :status :res[content-length] - :response-time ms");
 
-app.listen(port, () => {
-  console.log(`your app running on ${port}`);
+app.listen(PORT, () => {
+  console.log(`your app running on ${PORT}`);
 });
