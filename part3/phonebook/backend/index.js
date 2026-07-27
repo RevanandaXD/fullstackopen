@@ -94,7 +94,7 @@ app.delete("/api/persons/:id", (req, res) => {
   const id = req.params.id;
   const newPerson = persons.filter((person) => person.id !== id);
 
-  res.json(newPerson);
+  res.status(204).end()
 });
 
 app.get("/api/info", (req, res) => {
