@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
-const cors = require('cors')
+const cors = require("cors");
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
 
 morgan.token("body", (req) => {
@@ -92,9 +92,9 @@ app.post("/api/persons", (req, res) => {
 
 app.delete("/api/persons/:id", (req, res) => {
   const id = req.params.id;
-  const newPerson = persons.filter((person) => person.id !== id);
+  persons = persons.filter((person) => person.id !== id);
 
-  res.status(204).end()
+  res.status(204).end();
 });
 
 app.get("/api/info", (req, res) => {
@@ -108,8 +108,6 @@ app.get("/api/info", (req, res) => {
     `,
   );
 });
-
-morgan(":method :url :status :res[content-length] - :response-time ms");
 
 app.listen(PORT, () => {
   console.log(`your app running on ${PORT}`);
