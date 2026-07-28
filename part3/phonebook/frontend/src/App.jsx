@@ -15,6 +15,11 @@ const App = () => {
     color: "",
   });
 
+  const emptyMessage = {
+    message: "",
+    color: ""
+  }
+
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
       setPersons(initialPersons);
@@ -67,10 +72,13 @@ const App = () => {
           );
           setNewName("");
           setNewNumber("");
-          setErrorMessage(``);
+          setErrorMessage(emptyMessage)
         })
-        .catch(() => {
-          alert(`Information of ${trimmedName} could not be updated`);
+        .catch((error) => {
+          setErrorMessage({
+            message: error.response.data.message,
+            color: "red",
+          });
         });
 
       return;
@@ -89,8 +97,11 @@ const App = () => {
         setNewNumber("");
         setErrorMessage({ message: `Added ${newPerson.name}`, color: "green" });
       })
-      .catch(() => {
-        alert("Failed to add person");
+      .catch((error) => {
+        setErrorMessage({
+          message: error.response.data.message,
+          color: "red",
+        });
       });
   };
 
