@@ -1,8 +1,11 @@
+require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
 const app = express();
 const morgan = require("morgan");
 const cors = require("cors");
+const Person = require("./models/person");
 
 app.use(cors());
 app.use(express.json());
@@ -17,51 +20,44 @@ app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms :body"),
 );
 
-const PORT = 13710; // not automatic due to free server limitations
+const PORT = process.env.PORT || 13710; // not automatic due to free server limitations
 
-let persons = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({
+    error: "unknown endpoint",
+  });
+};
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message);
 
-// app.get("/", (req, res) => {
-//   res.send("<h1>Hello Api</h1>");
-// });
+  if (error.name === "CastError") {
+    return res.status(400).send({
+      message: error.message,
+    });
+  }
 
-app.get("/api/persons", (req, res) => {
-  res.json(persons);
+  next(error);
+};
+
+app.get("/api/persons", (req, res, next) => {
+  Person.find({})
+    .then((result) => {
+      res.json(result);
+    })
+    .catch(next);
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
   const id = req.params.id;
-  const personInfo = persons.find((person) => person.id === id);
-
-  personInfo ? res.json(personInfo) : res.status(404).end();
+  Person.findById(id)
+    .then((result) => {
+      result ? res.json(result) : res.status(404).end();
+    })
+    .catch(next);
 });
 
-app.post("/api/persons", (req, res) => {
-  const id = Math.floor(Math.random() * 1000);
+app.post("/api/persons", (req, res, next) => {
   const { name, number } = req.body;
-
-  const findName = persons.find((person) => person.name === name);
 
   if (!name)
     return res.status(400).json({
@@ -73,44 +69,80 @@ app.post("/api/persons", (req, res) => {
       error: "Missing number",
     });
 
-  if (findName)
-    return res.status(409).json({
-      error: "Username already exist",
-    });
+  Person.findOne({ name })
+    .then((result) => {
+      if (result) {
+        return res.status(409).json({
+          error: "Username Already Exists",
+        });
+      }
 
-  const newPerson = {
-    id,
-    name,
-    number,
-  };
+      const newPerson = new Person({
+        name,
+        number,
+      });
 
-  persons.push(newPerson);
-
-  res.status(201).json({
-    success: true,
-    message: "berhasil ditambahkan",
-    data: newPerson,
-  });
+      newPerson
+        .save()
+        .then((result) => {
+          res.status(201).json({
+            success: true,
+            message: "berhasil ditambahkan",
+            data: result,
+          });
+        })
+        .catch(next);
+    })
+    .catch(next);
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.put("/api/persons/:id", (req, res, next) => {
   const id = req.params.id;
-  persons = persons.filter((person) => person.id !== id);
+  const { name, number } = req.body;
+  Person.findById(id)
+    .then((result) => {
+      if (result) {
+        ((result.name = name), (result.number = number));
+        result
+          .save()
+          .then((updatePerson) => {
+            res.status(200).json({
+              success: true,
+              message: "berhasil terupdate",
+              data: updatePerson,
+            });
+          })
+          .catch(next);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch(next);
+});
 
-  res.status(204).end();
+app.delete("/api/persons/:id", (req, res, next) => {
+  const id = req.params.id;
+  Person.findByIdAndDelete(id)
+    .then((result) => {
+      result ? res.json(result) : res.status(204).end();
+    })
+    .catch(next);
 });
 
 app.get("/api/info", (req, res) => {
-  const totalPersons = persons.length;
-  const date = new Date();
-
-  res.send(
-    `
-      <p>Phonebook has info for ${totalPersons} people</p>
-      <p>${date}</p>
-    `,
-  );
+  Person.estimatedDocumentCount().then((result) => {
+    const date = new Date();
+    res.send(
+      `
+        <p>Phonebook has info for ${result} people</p>
+        <p>${date}</p>
+      `
+    )
+  }).catch(next)
 });
+
+app.use(unknownEndpoint);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`your app running on ${PORT}`);
