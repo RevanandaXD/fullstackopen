@@ -1,0 +1,13 @@
+POST http://localhost:3004/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Microservice and the First Law of Distribution Objects",
+  "author": "Martin Fowler",
+  "url": "https://microservice-and-first-law.com",
+  "user": {
+    "id": "6a733b25ce817c140406662e",
+    "username": "mluukkai",
+    "name":"Matti Luukkainen"
+  }
+}

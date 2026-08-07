@@ -1,3 +1,8 @@
+const User = require("../models/users");
+const supertest = require("supertest")
+const app = require("../app");
+const api = supertest(app);
+
 const initialBlogs = [
   {
     title: "React patterns",
@@ -19,6 +24,22 @@ const initialBlogs = [
   },
 ];
 
+const userInDb = async () => {
+  const users = await User.find({});
+  return users.map((u) => u.toJSON());
+};
+
+const loginAndGetToken = async () => {
+  const loginUser = await api.post('/api/login').send({
+    username: 'mluukkai',
+    password: "supersecret"
+  })
+
+  return loginUser.body.token
+}
+
 module.exports = {
+  userInDb,
   initialBlogs,
+  loginAndGetToken
 };

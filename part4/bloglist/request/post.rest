@@ -1,9 +1,0 @@
-POST http://localhost:3004/api/blogs
-Content-Type: application/json
-
-{
-  "title": "Learning Fullstack",
-  "author": "Revananda",
-  "url": "https://example.is-a.dev",
-  "likes": 15
-}

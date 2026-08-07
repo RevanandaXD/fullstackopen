@@ -1,6 +1,7 @@
-const { test, describe } = require("node:test");
+const { after, test, describe } = require("node:test");
 const assert = require("node:assert");
 const listHelper = require("../utils/list_helper.js");
+const mongoose = require('mongoose')
 
 test("dummy returns one", () => {
   const blog = [];
@@ -98,3 +99,7 @@ describe("total likes", () => {
     })
   })
 });
+
+after(async () => {
+  mongoose.connection.close()
+})
